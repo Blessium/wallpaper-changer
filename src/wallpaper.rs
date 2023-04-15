@@ -1,4 +1,5 @@
-pub struct FileManager {
+#[derive(Default)]
+pub struct WallpaperManager {
     known_path: Vec<String>,
 }
 

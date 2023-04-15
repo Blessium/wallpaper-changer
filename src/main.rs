@@ -6,7 +6,7 @@ use ui::MyEguiApp;
 fn main() {
     let native_options = eframe::NativeOptions::default();
     eframe::run_native(
-        "My egui App",
+        "Wallpaper changer",
         native_options,
         Box::new(|cc| Box::new(MyEguiApp::new(cc))),
     );

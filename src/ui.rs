@@ -1,10 +1,12 @@
 use eframe::egui;
-use eframe::egui::{FontId, Color32, ComboBox, ScrollArea, TextEdit};
+use eframe::egui::{menu, ComboBox, ScrollArea, TextEdit};
+use crate::wallpaper::WallpaperManager;
 
 #[derive(Default)]
 pub struct MyEguiApp {
     wallpaper_search_text: String,
     wallpaper_mode: Mode,
+    wallpaper_manager: WallpaperManager,
 }
 
 #[derive(Debug, PartialEq, Default)]
@@ -26,25 +28,34 @@ impl MyEguiApp {
         // for e.g. egui::PaintCallback.
         Self::default()
     }
+
+
 }
 
 impl eframe::App for MyEguiApp {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
+        egui::TopBottomPanel::top("Wallpaper changer").show(ctx, | ui | {
+           menu::bar(ui, |ui| {
+               ui.menu_button("File", | ui | {
+                    if ui.button("Import wallpaper").clicked() {
+                        if let Some(wallpapers_path) = rfd::FileDialog::new().pick_files() {
+                            println!("{:?}", wallpapers_path);
+                        } 
+                    }
+                    if ui.button("Import folder").clicked() {
+                        if let Some(folders_path) = rfd::FileDialog::new().pick_folders() {
+                            println!("{:?}", folders_path);
+                        }
+                    }
+               });
+           }); 
+        });
+
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Wallpaper switcher");
-            
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
-                    ui.horizontal(|ui| {
-
-                        ui.add(TextEdit::singleline(&mut self.wallpaper_search_text).hint_text("Search wallpaper"));
-
-                        if ui.button("+").clicked() {
-                            if let Some(path) = rfd::FileDialog::new().set_title("Select file or directory").pick_file() {
-                                println!("{}", path.display().to_string());
-                            }
-                        }
-                    });
+                    ui.add(TextEdit::singleline(&mut self.wallpaper_search_text).hint_text("Search wallpaper"));
                     ScrollArea::vertical().show(ui, |ui| { ui.label("works"); });
                 });
 
