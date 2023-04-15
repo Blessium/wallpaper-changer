@@ -32,16 +32,24 @@ impl eframe::App for MyEguiApp {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Wallpaper switcher");
+            
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
+                    ui.horizontal(|ui| {
 
-                    ui.add(TextEdit::singleline(&mut self.wallpaper_search_text).hint_text("Search wallpaper"));
+                        ui.add(TextEdit::singleline(&mut self.wallpaper_search_text).hint_text("Search wallpaper"));
 
-                    ScrollArea::vertical().show(ui, |ui| {
-                        ui.label("works");
+                        if ui.button("+").clicked() {
+                            if let Some(path) = rfd::FileDialog::new().set_title("Select file or directory").pick_file() {
+                                println!("{}", path.display().to_string());
+                            }
+                        }
                     });
+                    ScrollArea::vertical().show(ui, |ui| { ui.label("works"); });
                 });
+
                 ui.separator();
+
                 ui.horizontal(|ui| {
                     ui.label("Positioning: ");
                     ComboBox::from_label("")

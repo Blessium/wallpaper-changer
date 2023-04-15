@@ -1,4 +1,5 @@
 mod ui;
+mod wallpaper;
 
 use ui::MyEguiApp;
 
