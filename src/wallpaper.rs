@@ -29,9 +29,13 @@ impl WallpaperManager {
         if self.known_wallpapers.len() == 0 {
             return None;
         }
-        Some(self.known_wallpapers.clone().into_iter()
-            .map(|(_, value)| value)
-            .collect::<Vec<Wallpaper>>())
+        Some(
+            self.known_wallpapers
+                .clone()
+                .into_iter()
+                .map(|(_, value)| value)
+                .collect::<Vec<Wallpaper>>(),
+        )
     }
 
     fn load_image(&mut self, mut file_path: PathBuf) -> Result<Wallpaper, ()> {
@@ -69,18 +73,15 @@ impl Wallpaper {
             file_name,
             dimension,
             image_data,
-            texture: None
+            texture: None,
         }
     }
 
     pub fn display(&mut self, ui: &mut egui::Ui) {
         let texture: &egui::TextureHandle = self.texture.get_or_insert_with(|| {
-            ui.ctx().load_texture(
-                &self.file_name,
-                self.image_data.clone(), 
-                Default::default(),
-            )
-        }); 
+            ui.ctx()
+                .load_texture(&self.file_name, self.image_data.clone(), Default::default())
+        });
         ui.image(texture, texture.size_vec2());
     }
 }
