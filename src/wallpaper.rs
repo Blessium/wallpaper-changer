@@ -15,7 +15,7 @@ impl WallpaperManager {
         }
     }
 
-    pub fn import_files(&mut self, file_paths: Vec<PathBuf>) -> Result<(), ()> {
+    pub fn import_wallpapers(&mut self, file_paths: Vec<PathBuf>) -> Result<(), ()> {
         for file_path in file_paths {
             if !self.known_wallpapers.contains_key(&file_path) {
                 let wallpaper = self.load_image(file_path.clone()).unwrap();
@@ -25,11 +25,21 @@ impl WallpaperManager {
         Ok(())
     }
 
+    pub fn load_wallpapers(&self) -> Option<Vec<Wallpaper>> {
+        if self.known_wallpapers.len() == 0 {
+            return None;
+        }
+        Some(self.known_wallpapers.clone().into_iter()
+            .map(|(_, value)| value)
+            .collect::<Vec<Wallpaper>>())
+    }
+
     fn load_image(&mut self, mut file_path: PathBuf) -> Result<Wallpaper, ()> {
         let image = ImageReader::open(&file_path)
             .expect("Could not open the file")
             .decode()
             .expect("Could not decode the file");
+        let image = image.resize(192, 108, image::imageops::FilterType::Triangle);
         let size = [image.width() as usize, image.height() as usize];
         let image_buffer = image.to_rgb8();
         let pixels = image_buffer.as_flat_samples();
@@ -42,12 +52,15 @@ impl WallpaperManager {
     }
 }
 
+#[derive(Clone)]
 pub struct Size(usize, usize);
 
+#[derive(Clone)]
 pub struct Wallpaper {
     pub file_name: String,
     pub dimension: Size,
     pub image_data: ColorImage,
+    texture: Option<egui::TextureHandle>,
 }
 
 impl Wallpaper {
@@ -56,6 +69,18 @@ impl Wallpaper {
             file_name,
             dimension,
             image_data,
+            texture: None
         }
+    }
+
+    pub fn display(&mut self, ui: &mut egui::Ui) {
+        let texture: &egui::TextureHandle = self.texture.get_or_insert_with(|| {
+            ui.ctx().load_texture(
+                &self.file_name,
+                self.image_data.clone(), 
+                Default::default(),
+            )
+        }); 
+        ui.image(texture, texture.size_vec2());
     }
 }

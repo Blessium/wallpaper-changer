@@ -38,7 +38,7 @@ impl eframe::App for MyEguiApp {
                     if ui.button("Import wallpaper").clicked() {
                         if let Some(wallpapers_path) = rfd::FileDialog::new().pick_files() {
                             self.wallpaper_manager
-                                .import_files(wallpapers_path)
+                                .import_wallpapers(wallpapers_path)
                                 .unwrap();
                         }
                     }
@@ -60,7 +60,13 @@ impl eframe::App for MyEguiApp {
                             .hint_text("Search wallpaper"),
                     );
                     ScrollArea::vertical().show(ui, |ui| {
-                        ui.label("works");
+                        if let Some(wallpapers) = self.wallpaper_manager.load_wallpapers() {
+                            for mut wallpaper in wallpapers {
+                                wallpaper.display(ui);
+                            }
+                        } else {
+                            ui.label("No wallpaper found");
+                        }
                     });
                 });
 
