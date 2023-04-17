@@ -1,6 +1,6 @@
 use crate::wallpaper::WallpaperManager;
 use eframe::egui;
-use eframe::egui::{menu, ComboBox, ScrollArea, TextEdit};
+use eframe::egui::{menu, ComboBox, Grid, ScrollArea, TextEdit};
 
 #[derive(Default)]
 pub struct MyEguiApp {
@@ -59,15 +59,29 @@ impl eframe::App for MyEguiApp {
                         TextEdit::singleline(&mut self.wallpaper_search_text)
                             .hint_text("Search wallpaper"),
                     );
-                    ScrollArea::vertical().show(ui, |ui| {
-                        if let Some(wallpapers) = self.wallpaper_manager.load_wallpapers() {
-                            for mut wallpaper in wallpapers {
-                                wallpaper.display(ui);
-                            }
-                        } else {
-                            ui.label("No wallpaper found");
-                        }
-                    });
+                    ScrollArea::vertical()
+                        .min_scrolled_height(192.0)
+                        .show(ui, |ui| {
+                            Grid::new("Wallpapers:").show(ui, |ui| {
+                                if let Some(wallpapers) = self.wallpaper_manager.load_wallpapers() {
+                                    let _idx = 0;
+                                    let _: _ = wallpapers
+                                        .into_iter()
+                                        .enumerate()
+                                        .map(|(idx, mut wallpaper)| {
+                                            if ((idx + 1) % 2) == 0 {
+                                                wallpaper.display(ui);
+                                                ui.end_row();
+                                            } else {
+                                                wallpaper.display(ui);
+                                            }
+                                        })
+                                        .collect::<Vec<_>>();
+                                } else {
+                                    ui.label("No wallpaper found");
+                                }
+                            });
+                        });
                 });
 
                 ui.separator();

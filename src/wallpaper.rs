@@ -1,4 +1,4 @@
-use eframe::{egui, egui::ColorImage};
+use eframe::{egui, egui::ColorImage, egui::ImageButton, egui::Sense};
 use image::io::Reader as ImageReader;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -29,6 +29,7 @@ impl WallpaperManager {
         if self.known_wallpapers.len() == 0 {
             return None;
         }
+
         Some(
             self.known_wallpapers
                 .clone()
@@ -52,6 +53,7 @@ impl WallpaperManager {
             file_path.pop().to_string(),
             Size(size[0], size[1]),
             image_data,
+            file_path.to_str().unwrap(),
         ))
     }
 }
@@ -63,25 +65,42 @@ pub struct Size(usize, usize);
 pub struct Wallpaper {
     pub file_name: String,
     pub dimension: Size,
+    pub file_path: String,
     pub image_data: ColorImage,
     texture: Option<egui::TextureHandle>,
+    image_button: Option<ImageButton>,
 }
 
 impl Wallpaper {
-    pub fn new(file_name: String, dimension: Size, image_data: ColorImage) -> Wallpaper {
+    pub fn new(
+        file_name: String,
+        dimension: Size,
+        image_data: ColorImage,
+        file_path: &str,
+    ) -> Wallpaper {
         Self {
             file_name,
             dimension,
             image_data,
             texture: None,
+            file_path: file_path.to_string(),
+            image_button: None,
         }
     }
 
+    pub fn check_clicked(&mut self) {}
+
     pub fn display(&mut self, ui: &mut egui::Ui) {
-        let texture: &egui::TextureHandle = self.texture.get_or_insert_with(|| {
-            ui.ctx()
-                .load_texture(&self.file_name, self.image_data.clone(), Default::default())
-        });
-        ui.image(texture, texture.size_vec2());
+        if let Some(button) = &self.image_button {
+            ui.add(button.clone());
+        } else {
+            let texture: &egui::TextureHandle = self.texture.get_or_insert_with(|| {
+                ui.ctx()
+                    .load_texture(&self.file_name, self.image_data.clone(), Default::default())
+            });
+
+            let button = ImageButton::new(texture, texture.size_vec2());
+            ui.add(button);
+        }
     }
 }
