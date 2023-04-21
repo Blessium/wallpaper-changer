@@ -5,19 +5,7 @@ use eframe::egui::{menu, ComboBox, Grid, ScrollArea, TextEdit};
 #[derive(Default)]
 pub struct MyEguiApp {
     wallpaper_search_text: String,
-    wallpaper_mode: Mode,
     wallpaper_manager: WallpaperManager,
-}
-
-#[derive(Debug, PartialEq, Default)]
-enum Mode {
-    #[default]
-    Center,
-    Crop,
-    Fit,
-    Span,
-    Stretch,
-    Tile,
 }
 
 impl MyEguiApp {
@@ -53,52 +41,34 @@ impl eframe::App for MyEguiApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Wallpaper switcher");
-            ui.horizontal(|ui| {
-                ui.vertical(|ui| {
-                    ui.add(
-                        TextEdit::singleline(&mut self.wallpaper_search_text)
-                            .hint_text("Search wallpaper"),
-                    );
-                    ScrollArea::vertical()
-                        .min_scrolled_height(192.0)
-                        .show(ui, |ui| {
-                            Grid::new("Wallpapers:").show(ui, |ui| {
-                                if let Some(wallpapers) = self.wallpaper_manager.load_wallpapers() {
-                                    let _idx = 0;
-                                    let _: _ = wallpapers
-                                        .into_iter()
-                                        .enumerate()
-                                        .map(|(idx, mut wallpaper)| {
-                                            if ((idx + 1) % 2) == 0 {
-                                                wallpaper.display(ui);
-                                                ui.end_row();
-                                            } else {
-                                                wallpaper.display(ui);
-                                            }
-                                        })
-                                        .collect::<Vec<_>>();
-                                } else {
-                                    ui.label("No wallpaper found");
-                                }
-                            });
+            ui.vertical(|ui| {
+                ui.add(
+                    TextEdit::singleline(&mut self.wallpaper_search_text)
+                        .hint_text("Search wallpaper"),
+                );
+                ScrollArea::vertical()
+                    .min_scrolled_height(192.0)
+                    .show(ui, |ui| {
+                        Grid::new("Wallpapers:").show(ui, |ui| {
+                            if let Some(wallpapers) = self.wallpaper_manager.load_wallpapers() {
+                                let _idx = 0;
+                                let _: _ = wallpapers
+                                    .into_iter()
+                                    .enumerate()
+                                    .map(|(idx, mut wallpaper)| {
+                                        if ((idx + 1) % 2) == 0 {
+                                            wallpaper.display(ui);
+                                            ui.end_row();
+                                        } else {
+                                            wallpaper.display(ui);
+                                        }
+                                    })
+                                    .collect::<Vec<_>>();
+                            } else {
+                                ui.label("No wallpaper found");
+                            }
                         });
-                });
-
-                ui.separator();
-
-                ui.horizontal(|ui| {
-                    ui.label("Positioning: ");
-                    ComboBox::from_label("")
-                        .selected_text(format!("{:?}", self.wallpaper_mode))
-                        .show_ui(ui, |ui| {
-                            ui.selectable_value(&mut self.wallpaper_mode, Mode::Center, "Center");
-                            ui.selectable_value(&mut self.wallpaper_mode, Mode::Crop, "Crop");
-                            ui.selectable_value(&mut self.wallpaper_mode, Mode::Fit, "Fit");
-                            ui.selectable_value(&mut self.wallpaper_mode, Mode::Span, "Span");
-                            ui.selectable_value(&mut self.wallpaper_mode, Mode::Stretch, "Stretch");
-                            ui.selectable_value(&mut self.wallpaper_mode, Mode::Tile, "Tile");
-                        });
-                });
+                    });
             });
         });
     }

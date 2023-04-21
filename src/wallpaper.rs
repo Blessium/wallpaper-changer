@@ -50,7 +50,6 @@ impl WallpaperManager {
         let pixels = image_buffer.as_flat_samples();
         let image_data = egui::ColorImage::from_rgb(size, pixels.as_slice());
         Ok(Wallpaper::new(
-            file_path.pop().to_string(),
             Size(size[0], size[1]),
             image_data,
             file_path.to_str().unwrap(),
@@ -63,7 +62,6 @@ pub struct Size(usize, usize);
 
 #[derive(Clone)]
 pub struct Wallpaper {
-    pub file_name: String,
     pub dimension: Size,
     pub file_path: String,
     pub image_data: ColorImage,
@@ -72,14 +70,8 @@ pub struct Wallpaper {
 }
 
 impl Wallpaper {
-    pub fn new(
-        file_name: String,
-        dimension: Size,
-        image_data: ColorImage,
-        file_path: &str,
-    ) -> Wallpaper {
+    pub fn new(dimension: Size, image_data: ColorImage, file_path: &str) -> Wallpaper {
         Self {
-            file_name,
             dimension,
             image_data,
             texture: None,
@@ -88,19 +80,20 @@ impl Wallpaper {
         }
     }
 
-    pub fn check_clicked(&mut self) {}
-
     pub fn display(&mut self, ui: &mut egui::Ui) {
         if let Some(button) = &self.image_button {
             ui.add(button.clone());
         } else {
             let texture: &egui::TextureHandle = self.texture.get_or_insert_with(|| {
                 ui.ctx()
-                    .load_texture(&self.file_name, self.image_data.clone(), Default::default())
+                    .load_texture(&self.file_path, self.image_data.clone(), Default::default())
             });
 
             let button = ImageButton::new(texture, texture.size_vec2());
-            ui.add(button);
+            let response = ui.add(button);
+            if response.clicked() {
+                wallpaper::set_from_path(&self.file_path).unwrap();
+            }
         }
     }
 }
